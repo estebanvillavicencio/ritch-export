@@ -1,0 +1,24 @@
+# RiTech SAS · Sistema de gestión de exportaciones de café y cacao a la UE
+#
+# Stack: FastAPI + SQLAlchemy 2.x
+#
+# Este es el archivo que leen los servicios de hosting (PythonAnywhere, Render,
+# Koyeb…). Está en la raíz del proyecto y no en backend/ para que se encuentre
+# sin importar desde dónde se despliegue.
+#
+# No incluye pytest ni httpx: son para trabajar en la computadora y en los
+# servicios gratuitos cada minuto de instalación cuenta.
+
+fastapi>=0.115
+uvicorn[standard]>=0.30
+sqlalchemy>=2.0
+pydantic>=2.7
+pydantic-settings>=2.3
+PyJWT>=2.8
+bcrypt>=4.1
+python-multipart>=0.0.9
+email-validator>=2.1
+
+# Driver de PostgreSQL (RR-003). Si la base va a ser SQLite, no hace falta,
+# pero dejarlo evita tener que tocar el archivo al cambiar de motor.
+psycopg[binary]>=2.9

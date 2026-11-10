@@ -1,0 +1,46 @@
+# Configuración para publicar la aplicación en un hosting.
+#
+# Sirve para los servicios que leen este archivo solos (Render, Koyeb). En
+# PythonAnywhere se ignora: ahí se configura a mano desde el panel.
+#
+# Antes de darle «Create», lee la nota del servicio: **el plan gratis apaga el
+# servicio a los 15 minutos sin visitas** y el disco es temporal. Para una
+# demostración funciona; para algo que tenga que estar siempre arriba hay que
+# pagar el plan de pago.
+
+services:
+  - type: web
+    name: ritch-export
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    # `--app-dir backend` es imprescindible: el código importa con `from app...`
+    # (rutas absolutas desde `backend/`), así que sin esto la aplicación no
+    # encuentra sus propios módulos y revienta al arrancar.
+    startCommand: uvicorn --app-dir backend app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/docs
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.3"
+      # La clave con la que se firman las sesiones. Se genera sola y es distinta
+      # en cada servicio, así que NO está publicada: con la clave de ejemplo,
+      # que sí está en el repositorio, cualquiera podría fabricar un token y
+      # entrar como administrador.
+      - key: RITECH_JWT_SECRET
+        generateValue: true
+      # Evita que las cuentas de demostración usen contraseñas conocidas
+      # cuando la aplicación está disponible públicamente.
+      - key: RITECH_DEMO_PASSWORD
+        generateValue: true
+      - key: RITECH_BUYER_PASSWORD
+        generateValue: true
+      # La base es SQLite porque el plan gratis no trae PostgreSQL. El archivo
+      # se borra en cada reinicio del servicio, así que la aplicación lo vuelve a
+      # sembrar sola al arrancar (ver app/sembrar_si_esta_vacia.py).
+      - key: RITECH_DB_URL
+        value: sqlite:///./ritch_dev.db
+      - key: RITECH_UPLOAD_DIR
+        value: ./uploads
+      - key: RITECH_JWT_EXPIRE_MINUTES
+        value: "720"

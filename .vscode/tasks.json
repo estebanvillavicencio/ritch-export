@@ -1,0 +1,49 @@
+{
+  "//": "Tareas de la terminal integrada. Ctrl+Shift+B abre la primera.",
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "RiTech: levantar",
+      "type": "shell",
+      "command": "python tools/levantar.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "RiTech: levantar y compartir",
+      "type": "shell",
+      "command": "python tools/levantar.py --tunel",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "RiTech: apagar",
+      "type": "shell",
+      "command": "python tools/bajar.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "RiTech: pruebas",
+      "type": "shell",
+      "command": "python -m pytest -q",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "RiTech: regenerar los entregables",
+      "type": "shell",
+      "command": "python -m docs.generar_todo",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "RiTech: revisar el portal del cliente",
+      "type": "shell",
+      "command": "python tools/verificar_portal.py",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    }
+  ]
+}

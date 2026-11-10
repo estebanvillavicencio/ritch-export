@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Base de datos local y copias
+*.db
+*.sqlite3
+backend/respaldos/
+respaldos/
+
+# Secretos: nunca versionar .env
+.env
+!.env.example
+
+# Documentos subidos
+backend/uploads/
+
+# Ficheros intermedios de la generación documental
+docs/salida/_tmp/
+docs/salida/
+
+# Registros de los procesos que se levantan en segundo plano, y el ejecutable
+# de cloudflared (54 MB). El vigilante los vuelve a crear solos.
+tools/logs/
+tools/bin/

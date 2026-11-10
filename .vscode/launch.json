@@ -1,0 +1,45 @@
+{
+  "//": "Ejecutar el sistema con F5. Estos archivos los genera el proyecto; " +
+        "se pueden borrar sin que nada se rompa, pero con ellos F5 funciona.",
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "RiTech: levantar la aplicación",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/tools/levantar.py",
+      "args": ["--tunel"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "RiTech: levantar la aplicación (sin enlace público)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/tools/levantar.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "RiTech: pruebas",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/backend",
+      "justMyCode": true
+    },
+    {
+      "name": "RiTech: un archivo suelto",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "cwd": "${fileDirname}",
+      "justMyCode": true
+    }
+  ]
+}

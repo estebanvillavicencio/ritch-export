@@ -1,0 +1,1380 @@
+"""Contenido documental del Sprint 2.
+
+Fuentes:
+  · Sistema de Gestión de Exportación de Café y Cacao a la Unión Europea (RF, RNF, RR, backlog)
+  · Informe_RiTech_SAS_completo (módulos, cadena de estados, KPIs)
+  · RiTech_Base_datos_relaciones_equipo_APIs (nueve tablas, relaciones, equipo)
+  · mockup-ritech-export-2.html (sistema de diseño)
+
+`RESPONSABLES` es una **propuesta** derivada del aporte documentado de cada
+integrante; debe confirmarse contra el tablero de Jira antes de entregar.
+"""
+
+from __future__ import annotations
+
+from docs.nombres import EQUIPO as INTEGRANTES
+
+PROYECTO = "Sistema de Gestión de Exportación de Café y Cacao a la Unión Europea"
+EMPRESA = "RiTech SAS"
+METODOLOGIA = "Scrum — sprints de dos semanas"
+FECHA = "29 de septiembre de 2026"
+
+EQUIPO = INTEGRANTES
+SEGUNDO_INTEGRANTE = EQUIPO[1]
+
+# =========================================================================== #
+# 1. Requisitos                                                               #
+# =========================================================================== #
+
+REQUISITOS_FUNCIONALES = [
+    ("RF-001", "Gestión de usuarios",
+     "El sistema permitirá crear usuarios, asignar roles y controlar los permisos de acceso.",
+     "Alta"),
+    ("RF-002", "Gestión de clientes europeos",
+     "El sistema permitirá registrar y consultar la información de los clientes importadores "
+     "de la Unión Europea.", "Alta"),
+    ("RF-003", "Gestión de productos y lotes",
+     "El sistema permitirá registrar productos y lotes de café y cacao, incluyendo su "
+     "cantidad, calidad y origen.", "Alta"),
+    ("RF-004", "Control de calidad",
+     "El sistema permitirá registrar y consultar los resultados de laboratorio, catación, "
+     "humedad y clasificación de los productos.", "Alta"),
+    ("RF-005", "Gestión de pedidos",
+     "El sistema permitirá crear y administrar pedidos indicando producto, cantidad, "
+     "calidad e Incoterm.", "Alta"),
+    ("RF-006", "Gestión de documentos",
+     "El sistema permitirá generar, almacenar y consultar los documentos necesarios para "
+     "las exportaciones.", "Alta"),
+    ("RF-007", "Gestión logística",
+     "El sistema permitirá registrar y administrar envíos, contenedores, rutas, puertos "
+     "y fechas de transporte.", "Alta"),
+    ("RF-008", "Seguimiento de exportaciones",
+     "El sistema permitirá consultar el estado de los pedidos y envíos desde su preparación "
+     "hasta su entrega en destino.", "Alta"),
+    ("RF-009", "Gestión de pagos",
+     "El sistema permitirá registrar anticipos, pagos, saldos y cartas de crédito "
+     "relacionados con los contratos de exportación.", "Alta"),
+]
+
+REQUISITOS_NO_FUNCIONALES = [
+    ("RNF-001", "Seguridad",
+     "El sistema deberá proteger la información de usuarios, clientes, operaciones y "
+     "documentos mediante mecanismos de seguridad.", "Alta"),
+    ("RNF-002", "Rendimiento",
+     "El sistema deberá responder de manera eficiente a las solicitudes y operaciones "
+     "realizadas por los usuarios.", "Alta"),
+    ("RNF-003", "Usabilidad",
+     "El sistema deberá contar con una interfaz clara, organizada y fácil de utilizar "
+     "para los diferentes usuarios.", "Alta"),
+    ("RNF-004", "Compatibilidad",
+     "El sistema deberá ser accesible desde computadores, tablets y dispositivos móviles "
+     "mediante tecnologías web.", "Alta"),
+    ("RNF-005", "Escalabilidad",
+     "El sistema deberá permitir incorporar nuevos usuarios, productos, países y módulos "
+     "a medida que la empresa crezca.", "Alta"),
+]
+
+REQUISITOS_RESTRICCION = [
+    ("RR-001", "Metodología de desarrollo",
+     "El proyecto deberá desarrollarse utilizando la metodología Scrum y sprints de dos "
+     "semanas.", "Alta"),
+    ("RR-002", "Tecnologías de desarrollo",
+     "El sistema deberá utilizar las tecnologías propuestas para el desarrollo de la "
+     "interfaz, backend y servicios.", "Alta"),
+    ("RR-003", "Base de datos",
+     "La información transaccional del sistema deberá almacenarse utilizando PostgreSQL.",
+     "Alta"),
+    ("RR-004", "Roles de usuario",
+     "El sistema deberá manejar los roles de Administrador, Comercial, Logística, Calidad, "
+     "Financiero y Cliente europeo.", "Alta"),
+    ("RR-005", "Arquitectura del sistema",
+     "El software deberá utilizar una arquitectura modular que permita separar la interfaz, "
+     "la lógica de negocio, la base de datos y los servicios externos.", "Alta"),
+]
+
+# =========================================================================== #
+# Actores y casos de uso                                                      #
+# =========================================================================== #
+
+ACTORES = [
+    ("Administrador", "Gestiona usuarios, roles y estados de las cuentas."),
+    ("Comercial", "Registra clientes europeos, cotiza y administra contratos y pedidos."),
+    ("Logística", "Coordina contenedores, navieras, rutas, puertos y estados de envío."),
+    ("Calidad", "Registra catación y laboratorio, y controla certificaciones."),
+    ("Financiero", "Consulta indicadores y, en el Sprint 3, registra pagos."),
+    ("Cliente europeo", "Accede al portal para consultar productos, pedidos, seguimiento "
+                        "y descargar documentos autorizados."),
+]
+
+# (módulo, [(nombre del caso de uso, actor principal)])
+CASOS_DE_USO = {
+    "Usuarios y seguridad": [
+        ("Crear usuario", "Administrador"),
+        ("Asignar roles", "Administrador"),
+        ("Controlar permisos", "Administrador"),
+        ("Iniciar sesión", "Todos"),
+        ("Cerrar sesión", "Todos"),
+        ("Recuperar contraseña", "Todos"),
+        ("Administrar estados de usuarios", "Administrador"),
+    ],
+    "Productores, lotes y trazabilidad": [
+        ("Registrar finca o asociación", "Comercial"),
+        ("Registrar productor y ubicación", "Comercial"),
+        ("Registrar lote de café o cacao", "Logística"),
+        ("Controlar inventario disponible", "Logística"),
+        ("Consultar trazabilidad de un lote", "Calidad"),
+        ("Registrar hito de trazabilidad", "Logística"),
+    ],
+    "Calidad y cumplimiento normativo": [
+        ("Registrar catación y laboratorio", "Calidad"),
+        ("Registrar humedad y clasificación", "Calidad"),
+        ("Registrar certificación EUDR, orgánico o Fairtrade", "Calidad"),
+        ("Controlar vencimientos de certificaciones", "Calidad"),
+        ("Consultar estado de calidad", "Comercial"),
+    ],
+    "Comercial": [
+        ("Registrar cliente importador europeo", "Comercial"),
+        ("Generar cotización multimoneda", "Comercial"),
+        ("Generar contrato de exportación", "Comercial"),
+        ("Crear pedido con Incoterm", "Comercial"),
+        ("Registrar documento de exportación", "Logística"),
+        ("Autorizar documento para el portal", "Comercial"),
+        ("Consultar historial comercial del cliente", "Comercial"),
+    ],
+    "Logística y seguimiento": [
+        ("Registrar contenedor", "Logística"),
+        ("Registrar envío y asignar contenedor", "Logística"),
+        ("Registrar estado de aduana", "Logística"),
+        ("Consultar línea de tiempo del envío", "Cliente europeo"),
+        ("Consultar estado del pedido y del envío", "Cliente europeo"),
+    ],
+    "Reportes, indicadores y portal": [
+        ("Consultar KPIs de exportación", "Financiero"),
+        ("Consultar cumplimiento normativo", "Financiero"),
+        ("Acceder al portal de clientes", "Cliente europeo"),
+        ("Consultar catálogo y certificaciones", "Cliente europeo"),
+        ("Crear pedido desde el portal", "Cliente europeo"),
+        ("Descargar documentos autorizados", "Cliente europeo"),
+        ("Registrar pago y carta de crédito", "Financiero"),
+    ],
+}
+
+# =========================================================================== #
+# Épicas e historias de usuario                                               #
+# =========================================================================== #
+
+# (id, épica, historia, rol, prioridad, puntos, criterios de aceptación, estado)
+HISTORIAS = [
+    ("HU-01", "Gestión de usuarios",
+     "Como administrador quiero crear y asignar roles para controlar el acceso al software.",
+     "Administrador", "Alta", 3,
+     [
+         "Dado un administrador autenticado, cuando crea un usuario con nombre, correo "
+         "único y rol, entonces el usuario queda registrado con estado «activo».",
+         "Si el correo ya existe, el sistema rechaza la creación indicando el conflicto.",
+         "La contraseña se almacena cifrada con bcrypt; nunca en texto plano.",
+     ],
+     "Terminada"),
+
+    ("HU-02", "Gestión de usuarios",
+     "Como usuario quiero iniciar sesión de forma segura para acceder únicamente a las "
+     "funciones autorizadas.",
+     "Todos", "Alta", 3,
+     [
+         "Con credenciales válidas, el sistema devuelve un token JWT con identificador, "
+         "rol y correo.",
+         "Con credenciales inválidas, el sistema responde 401 con un mensaje genérico que no "
+         "revela si el correo existe.",
+         "Un token ausente, alterado o vencido se rechaza con 401.",
+         "Cada endpoint rechaza con 403 a los roles sin permiso.",
+     ],
+     "Terminada"),
+
+    ("HU-03", "Gestión de clientes UE",
+     "Como comercial quiero registrar clientes importadores europeos para gestionar la "
+     "relación comercial.",
+     "Comercial", "Alta", 3,
+     [
+         "Puedo registrar razón social, país, VAT, dirección, contacto, puerto de destino "
+         "y moneda preferida.",
+         "El listado devuelve el registro completo, incluido el estado activo.",
+         "El cliente queda disponible como opción al crear cotizaciones, pedidos y "
+         "exportaciones.",
+     ],
+     "Terminada"),
+
+    ("HU-04", "Productores y lotes",
+     "Como comprador quiero registrar fincas y asociaciones de café y cacao para conocer el "
+     "origen del producto.",
+     "Comercial", "Alta", 5,
+     [
+         "Puedo registrar nombre, ubicación, departamento, propietario, productor, "
+         "asociación, altitud y superficie.",
+         "Permite capturar latitud y longitud, dato exigido por el Reglamento europeo de "
+         "deforestación (EUDR).",
+         "Tras registrar o editar una finca, la tabla y el selector de lotes se actualizan "
+         "sin recargar la página.",
+     ],
+     "Terminada"),
+
+    ("HU-05", "Productores y lotes",
+     "Como logística quiero registrar lotes de café y cacao para controlar el inventario "
+     "disponible para exportación.",
+     "Logística", "Alta", 5,
+     [
+         "Al crear un lote sin código, el sistema genera uno correlativo con el formato "
+         "CO-HUI-AAAA-NNNN.",
+         "Un código de lote repetido se rechaza con 409.",
+         "La fecha de cosecha no puede ser futura.",
+         "El disponible se calcula como cantidad menos lo comprometido en exportaciones no "
+         "anuladas.",
+         "No se puede reducir la cantidad de un lote por debajo de los kilos ya comprometidos.",
+     ],
+     "Terminada"),
+
+    ("HU-06", "Trazabilidad",
+     "Como responsable de calidad quiero conocer el recorrido de cada lote desde la finca "
+     "hasta el destino.",
+     "Calidad", "Alta", 8,
+     [
+         "Al crear un lote se registra automáticamente el hito «Finca».",
+         "La trazabilidad muestra las seis etapas: Finca, Beneficio, Puerto origen, Tránsito "
+         "marítimo, Aduana UE y Cliente.",
+         "Las etapas con hito registrado aparecen como completadas y la primera sin registro "
+         "como etapa actual.",
+         "Puedo registrar hitos adicionales con fecha, ubicación y descripción.",
+     ],
+     "Terminada"),
+
+    ("HU-07", "Cumplimiento normativo",
+     "Como responsable de comercio exterior quiero registrar y validar las certificaciones "
+     "exigidas para la exportación.",
+     "Calidad", "Alta", 8,
+     [
+         "Puedo registrar EUDR, orgánico, Fairtrade, fitosanitario y Rainforest Alliance.",
+         "El estado se deriva de las fechas: Vigente, Por renovar a 45 días, Vencida.",
+         "La fecha de vencimiento no puede ser anterior a la de emisión.",
+         "Para el EUDR, la certificación solo cuenta si el lote está georreferenciado.",
+     ],
+     "Terminada"),
+
+    ("HU-08", "Cotizaciones y contratos",
+     "Como comercial quiero generar cotizaciones y contratos en diferentes monedas.",
+     "Comercial", "Alta", 5,
+     [
+         "El total se calcula automáticamente como cantidad por precio por kilogramo.",
+         "Se validan los Incoterms vigentes: EXW, FCA, CPT, CIP, DAP, DPU, DDP, FAS, FOB, "
+         "CFR y CIF.",
+         "Al aceptar la cotización se genera un contrato con número correlativo CT-AAAA-NNNN "
+         "y se descuentan los lotes del inventario.",
+         "Una cotización ya convertida no puede convertirse de nuevo.",
+     ],
+     "Terminada"),
+
+    ("HU-09", "Gestión de pedidos",
+     "Como cliente europeo quiero crear pedidos indicando cantidad, calidad e Incoterm.",
+     "Comercial", "Alta", 5,
+     [
+         "Un pedido no puede comprometer más kilos de los disponibles en el lote.",
+         "Un mismo lote no puede repetirse dentro de la misma exportación.",
+         "El pedido inicia en el estado «Pedido recibido».",
+     ],
+     "Terminada"),
+
+    ("HU-10", "Documentación",
+     "Como logística quiero generar y almacenar documentos de exportación.",
+     "Logística", "Alta", 8,
+     [
+         "Puedo registrar factura comercial, packing list, certificado de origen, BL, AWB, "
+         "certificados y documentos aduaneros.",
+         "Un número de documento repetido se rechaza con 409.",
+         "Solo un documento emitido o validado puede autorizarse para el portal.",
+     ],
+     "Terminada"),
+
+    ("HU-11", "Gestión aduanera",
+     "Como agente de comercio exterior quiero registrar el estado del proceso aduanero.",
+     "Logística", "Media", 5,
+     [
+         "Puedo registrar el envío en aduana y la fecha estimada de llegada.",
+         "La llegada nunca puede ser anterior a la salida.",
+     ],
+     "Terminada"),
+
+    ("HU-12", "Logística",
+     "Como responsable de logística quiero coordinar transporte, contenedores y rutas.",
+     "Logística", "Alta", 8,
+     [
+         "Un contenedor no puede asignarse si la exportación pesa más que su capacidad.",
+         "El número de seguimiento es único.",
+         "Al crear o actualizar un envío, el estado de la exportación se sincroniza.",
+         "Un envío entregado debe tener fecha de llegada.",
+     ],
+     "Terminada"),
+
+    ("HU-13", "Tracking",
+     "Como cliente quiero consultar el estado de mi pedido y envío.",
+     "Cliente europeo", "Media", 5,
+     [
+         "El cliente solo ve las operaciones de su propia cuenta.",
+         "La consulta muestra las seis etapas del envío y los días de tránsito.",
+         "Cuando el envío está entregado, todas las etapas aparecen como completadas.",
+     ],
+     "Terminada"),
+
+    ("HU-14", "Pagos",
+     "Como financiero quiero registrar pagos, anticipos y cartas de crédito.",
+     "Financiero", "Alta", 5,
+     ["Programado para el Sprint 3."], "No iniciada"),
+
+    ("HU-15", "Reportes",
+     "Como gerente quiero consultar indicadores de exportación para tomar decisiones.",
+     "Financiero", "Media", 5,
+     [
+         "Muestra volumen exportado, kilos de café y de cacao, ingresos, pedidos, envíos "
+         "activos, clientes y tiempo promedio de entrega.",
+         "El panel general presenta cuatro tarjetas KPI, barras de cumplimiento normativo, "
+         "pedidos recientes y la ficha de lote.",
+     ],
+     "Terminada"),
+
+    ("HU-16", "Notificaciones",
+     "Como usuario quiero recibir notificaciones sobre cambios de estado y vencimientos.",
+     "Todos", "Media", 3,
+     [
+         "El panel muestra avisos por certificaciones por vencer y envíos con incidencia.",
+     ],
+     "Parcial"),
+
+    ("HU-17", "Calidad",
+     "Como responsable de calidad quiero registrar resultados de catación y laboratorio.",
+     "Calidad", "Media", 5,
+     [
+         "Registro humedad, puntaje de cata, actividad de agua, granulometría, impurezas, "
+         "clasificación y laboratorio.",
+         "La humedad se valida entre 8 % y 14 %.",
+         "El estado del lote se deriva del resultado: Special (≥ 85) con responsable → "
+         "Aprobado; 80–84,99 con humedad ≤ 12 % → Aprobado; 60–79,99 → Con reserva.",
+     ],
+     "Terminada"),
+
+    ("HU-18", "Portal de clientes",
+     "Como cliente europeo quiero acceder a un portal para consultar productos, pedidos y "
+     "documentos.",
+     "Cliente europeo", "Media", 8,
+     [
+         "El portal permite elegir idioma y moneda de presentación.",
+         "El cliente solo accede a la información de sus propias operaciones.",
+         "Solo puede descargar los documentos que RiTech haya autorizado expresamente.",
+     ],
+     "Terminada"),
+
+    ("HU-19", "Multilenguaje y multimoneda",
+     "Como cliente europeo quiero utilizar el sistema en diferentes idiomas y consultar "
+     "precios en EUR.",
+     "Cliente europeo", "Baja", 5,
+     [
+         "El portal ofrece selección de idioma y moneda; los precios se convertyen a la "
+         "moneda elegida.",
+     ],
+     "Parcial"),
+
+    ("HU-20", "Integraciones",
+     "Como sistema quiero integrarme con servicios externos cuando sea necesario.",
+     "Administrador", "Baja", 8,
+     ["Programado para el Sprint 3."], "No iniciada"),
+
+    ("HU-21", "Auditoría y seguridad",
+     "Como administrador quiero registrar las acciones críticas realizadas en el software.",
+     "Administrador", "Media", 5,
+     [
+         "Las operaciones sensibles registran fecha de actualización y responsable.",
+     ],
+     "Parcial"),
+
+    ("HU-22", "Copias de seguridad",
+     "Como administrador quiero realizar copias de seguridad automáticas para garantizar la "
+     "continuidad del servicio.",
+     "Administrador", "Media", 2,
+     ["Programado para el Sprint 3."], "No iniciada"),
+]
+
+# =========================================================================== #
+# 3. Product backlog de septiembre                                             #
+# =========================================================================== #
+
+# (clave, tipo, épica, resumen, historias, responsable, estado, avance)
+BACKLOG_SEPTIEMBRE = [
+    ("RIT-101", "Épica", "Gestión de usuarios",
+     "Autenticación, roles y control de permisos.", "HU-01, HU-02",
+     "Andres Esteban Villavicencio Ojeda", "Terminada", "100 %"),
+    ("RIT-102", "Épica", "Productores y lotes",
+     "Registro de fincas, productores y lotes con inventario.", "HU-04, HU-05",
+     "Juan Camilo Araujo Portilla", "Terminada", "100 %"),
+    ("RIT-103", "Épica", "Trazabilidad",
+     "Recorrido del lote desde la finca hasta el destino.", "HU-06",
+     "Dario Sebastian Paz Cabrera", "Terminada", "100 %"),
+    ("RIT-104", "Épica", "Calidad y cumplimiento",
+     "Catación, laboratorio y certificaciones EUDR, orgánicas y Fairtrade.",
+     "HU-07, HU-17", "Dario Sebastian Paz Cabrera", "Terminada", "100 %"),
+    ("RIT-105", "Épica", "Comercial",
+     "Clientes europeos, cotizaciones multimoneda, contratos y pedidos.",
+     "HU-03, HU-08, HU-09", "Juan Camilo Araujo Portilla", "Terminada", "100 %"),
+    ("RIT-106", "Épica", "Documentación",
+     "Factura comercial, packing list, certificado de origen, BL y AWB.", "HU-10",
+     "Andres Esteban Villavicencio Ojeda", "Terminada", "100 %"),
+    ("RIT-107", "Épica", "Logística",
+     "Contenedores, navieras, rutas, puertos y estados de envío.", "HU-11, HU-12",
+     "Dario Sebastian Paz Cabrera", "Terminada", "100 %"),
+    ("RIT-108", "Épica", "Seguimiento",
+     "Consulta del estado de pedidos y envíos por el cliente.", "HU-13",
+     "Andres Esteban Villavicencio Ojeda", "Terminada", "100 %"),
+    ("RIT-109", "Épica", "Reportes y KPIs",
+     "Indicadores gerenciales y panel general.", "HU-15",
+     "Andres Esteban Villavicencio Ojeda", "Terminada", "100 %"),
+    ("RIT-110", "Épica", "Portal del cliente",
+     "Catálogo, pedidos, seguimiento y descarga de documentos.", "HU-18, HU-19",
+     "Juan Camilo Araujo Portilla", "Terminada", "90 %"),
+    ("RIT-111", "Épica", "Notificaciones y auditoría",
+     "Avisos de vencimiento y registro de acciones críticas.", "HU-16, HU-21",
+     "Dario Sebastian Paz Cabrera", "En curso", "50 %"),
+    ("RIT-112", "Historia", "Módulo financiero",
+     "Anticipos, pagos, saldos y cartas de crédito.", "HU-14",
+     SEGUNDO_INTEGRANTE, "No iniciada", "0 %"),
+    ("RIT-113", "Historia", "Integraciones y respaldos",
+     "Servicios externos, copias de seguridad y despliegue.", "HU-20, HU-22",
+     SEGUNDO_INTEGRANTE, "No iniciada", "0 %"),
+]
+
+# (clave, tarea, tipo, responsable, avance)
+TAREAS_SEPTIEMBRE = [
+    ("RIT-90", "Definir el modelo de datos de nueve tablas y sus llaves primarias",
+     "Tarea técnica", "Andres Esteban Villavicencio Ojeda", "100 %"),
+    ("RIT-91", "Definir las relaciones entre tablas y el esquema SQL",
+     "Tarea técnica", SEGUNDO_INTEGRANTE, "100 %"),
+    ("RIT-92", "Levantar la API REST, la autenticación JWT y el control por roles",
+     "Tarea técnica", SEGUNDO_INTEGRANTE, "100 %"),
+    ("RIT-93", "Construir el panel general y la línea de tiempo de envíos",
+     "Historia de usuario", "Andres Esteban Villavicencio Ojeda", "100 %"),
+    ("RIT-94", "Construir las pantallas de lotes, calidad y certificaciones",
+     "Historia de usuario", "Dario Sebastian Paz Cabrera", "100 %"),
+    ("RIT-95", "Construir las pantallas de clientes, cotizaciones y pedidos",
+     "Historia de usuario", "Juan Camilo Araujo Portilla", "100 %"),
+    ("RIT-96", "Construir las pantallas de contenedores y envíos",
+     "Historia de usuario", "Dario Sebastian Paz Cabrera", "100 %"),
+    ("RIT-97", "Construir el portal del cliente europeo",
+     "Historia de usuario", "Juan Camilo Araujo Portilla", "90 %"),
+    ("RIT-98", "Datos de demostración de café y cacao de Colombia",
+     "Tarea técnica", "Juan Camilo Araujo Portilla", "100 %"),
+    ("RIT-99", "Pruebas automatizadas de los cuatro módulos",
+     "Tarea técnica", "Andres Esteban Villavicencio Ojeda", "100 %"),
+]
+
+# =========================================================================== #
+# 5. Estructura de la base de datos                                           #
+# =========================================================================== #
+
+# (tabla, [(campo, tipo, pk/fk/nota)], descripción)
+NUCLEO_TABLAS = [
+    ("usuarios", [
+        ("id_usuario", "INT", "PK"),
+        ("nombre", "VARCHAR(100)", ""),
+        ("correo", "VARCHAR(150)", "único"),
+        ("contrasena_hash", "VARCHAR(255)", "bcrypt"),
+        ("rol", "VARCHAR(50)", "Administrador · Comercial · Logística · Calidad · Financiero · Cliente europeo"),
+        ("estado", "VARCHAR(20)", "activo · inactivo · bloqueado"),
+    ], "Personas con acceso al sistema. Un usuario registra muchas exportaciones."),
+    ("clientes", [
+        ("id_cliente", "INT", "PK"),
+        ("nombre_empresa", "VARCHAR(150)", ""),
+        ("pais", "VARCHAR(100)", ""),
+        ("direccion", "VARCHAR(200)", ""),
+        ("correo", "VARCHAR(150)", ""),
+        ("telefono", "VARCHAR(30)", ""),
+        ("vat", "VARCHAR(50)", "identificador fiscal UE"),
+        ("moneda_preferida", "VARCHAR(10)", "EUR · USD · COP"),
+        ("puerto_destino", "VARCHAR(100)", ""),
+    ], "Importadores de la Unión Europea. Un cliente realiza muchas exportaciones."),
+    ("productos", [
+        ("id_producto", "INT", "PK"),
+        ("nombre", "VARCHAR(100)", ""),
+        ("tipo", "VARCHAR(50)", "Café · Cacao"),
+        ("descripcion", "TEXT", ""),
+        ("variedad", "VARCHAR(100)", "Caturra · Castillo · Criollo"),
+        ("precio_referencia_eur", "NUMERIC(12,2)", ""),
+    ], "Tipos de café y cacao. Un producto tiene muchos lotes."),
+    ("fincas", [
+        ("id_finca", "INT", "PK"),
+        ("nombre", "VARCHAR(150)", ""),
+        ("ubicacion", "VARCHAR(200)", ""),
+        ("departamento", "VARCHAR(100)", ""),
+        ("propietario", "VARCHAR(150)", ""),
+        ("productor", "VARCHAR(150)", ""),
+        ("asociacion", "VARCHAR(150)", ""),
+        ("latitud / longitud", "NUMERIC(10,7)", "georreferenciación EUDR"),
+    ], "Origen del producto. Una finca tiene muchos lotes."),
+    ("lotes", [
+        ("id_lote", "INT", "PK"),
+        ("id_finca", "INT", "FK → fincas"),
+        ("id_producto", "INT", "FK → productos"),
+        ("codigo_lote", "VARCHAR(50)", "único · CO-HUI-AAAA-NNNN"),
+        ("cantidad_kg", "NUMERIC(12,2)", ""),
+        ("fecha_cosecha", "DATE", ""),
+        ("estado_calidad", "VARCHAR(50)", "Pendiente · En análisis · Aprobado · Con reserva · Rechazado"),
+        ("disponible_kg", "NUMERIC(12,2)", "cantidad − comprometido"),
+    ], "Unidad de trazabilidad. Un lote aparece en muchas exportaciones."),
+    ("exportaciones", [
+        ("id_exportacion", "INT", "PK"),
+        ("id_cliente", "INT", "FK → clientes"),
+        ("id_usuario", "INT", "FK → usuarios"),
+        ("fecha", "DATE", ""),
+        ("estado", "VARCHAR(50)", "cadena de 7 estados"),
+        ("moneda", "VARCHAR(10)", ""),
+        ("numero_contrato", "VARCHAR(60)", "único · CT-AAAA-NNNN"),
+        ("incoterm", "VARCHAR(20)", "EXW · FCA · FOB · CFR · CIF …"),
+    ], "Operación de exportación. Es la entidad central del módulo comercial."),
+    ("detalle_exportacion", [
+        ("id_detalle", "INT", "PK"),
+        ("id_exportacion", "INT", "FK → exportaciones"),
+        ("id_lote", "INT", "FK → lotes"),
+        ("cantidad_kg", "NUMERIC(12,2)", ""),
+        ("precio_kg", "NUMERIC(12,2)", ""),
+    ], "Líneas de una exportación. El par (exportación, lote) es único."),
+    ("documentos_exportacion", [
+        ("id_documento", "INT", "PK"),
+        ("id_exportacion", "INT", "FK → exportaciones"),
+        ("tipo_documento", "VARCHAR(100)", "factura · packing list · BL · AWB"),
+        ("numero_documento", "VARCHAR(100)", "único"),
+        ("fecha_emision", "DATE", ""),
+        ("estado", "VARCHAR(50)", "Borrador · Emitido · Validado · Anulado"),
+        ("autorizado_cliente", "BOOLEAN", "visible en el portal"),
+    ], "Documentación de la operación de exportación."),
+    ("envios", [
+        ("id_envio", "INT", "PK"),
+        ("id_exportacion", "INT", "FK → exportaciones"),
+        ("transportadora", "VARCHAR(100)", ""),
+        ("numero_seguimiento", "VARCHAR(100)", "único"),
+        ("fecha_salida", "DATE", ""),
+        ("fecha_llegada", "DATE", ""),
+        ("estado", "VARCHAR(50)", "Programado · En tránsito · En aduana · Entregado · Incidencia"),
+    ], "Transporte internacional. Una exportación puede tener varios envíos."),
+]
+
+EXTENSIONES_TABLAS = [
+    ("contenedores", "Módulo de logística (HU-12). Código, tipo, capacidad y naviera."),
+    ("calidad_lote", "Módulo de calidad (HU-17). Humedad, catación, actividad de agua, clasificación."),
+    ("certificaciones", "Cumplimiento normativo. EUDR, orgánico, Fairtrade y fitosanitario, con emisión y vencimiento."),
+    ("eventos_trazabilidad", "Hitos del recorrido del lote: finca, beneficio, puerto, tránsito, aduana y cliente."),
+    ("cotizaciones", "Cotizaciones multimoneda con Incoterm y vigencia, convertibles en contrato."),
+]
+
+# (origen, destino, cardinalidad, regla)
+RELACIONES = [
+    ("fincas", "lotes", "1 : N", "Una finca tiene muchos lotes; cada lote pertenece a una finca."),
+    ("productos", "lotes", "1 : N", "Un producto tiene muchos lotes; cada lote corresponde a un producto."),
+    ("clientes", "exportaciones", "1 : N", "Un cliente realiza muchas exportaciones."),
+    ("usuarios", "exportaciones", "1 : N", "Un usuario registra muchas exportaciones."),
+    ("exportaciones", "detalle_exportacion", "1 : N", "Una exportación contiene muchas líneas."),
+    ("lotes", "detalle_exportacion", "1 : N", "Un lote aparece en muchas líneas de exportación."),
+    ("exportaciones", "documentos_exportacion", "1 : N", "Una exportación tiene muchos documentos."),
+    ("exportaciones", "envios", "1 : N", "Una exportación puede tener uno o varios envíos."),
+    ("contenedores", "envios", "1 : N", "Un contenedor transporta varios envíos."),
+    ("lotes", "calidad_lote", "1 : 1", "Cada lote tiene como máximo un registro de calidad."),
+    ("lotes", "certificaciones", "1 : N", "Un lote puede tener varias certificaciones."),
+    ("lotes", "eventos_trazabilidad", "1 : N", "Un lote tiene varios hitos de trazabilidad."),
+    ("clientes", "cotizaciones", "1 : N", "Un cliente recibe muchas cotizaciones."),
+]
+
+MODULOS = [
+    ("6.1", "Usuarios y seguridad", "Terminado", "Alta"),
+    ("6.2", "Productores, fincas y lotes", "Terminado", "Alta"),
+    ("6.3", "Calidad", "Terminado", "Alta"),
+    ("6.4", "Cumplimiento normativo", "Terminado", "Alta"),
+    ("6.5", "Comercial", "Terminado", "Alta"),
+    ("6.6", "Logística", "Terminado", "Alta"),
+    ("6.7", "Documentación", "Terminado", "Alta"),
+    ("6.8", "Financiero", "No iniciado", "Sprint 3"),
+    ("6.9", "Seguimiento", "Terminado", "Alta"),
+    ("6.10", "Reportes y KPIs", "Terminado", "Media"),
+    ("7", "Portal de clientes europeos", "Terminado", "Media"),
+]
+
+KPIS = [
+    "Volumen exportado", "Cantidad de café exportado", "Cantidad de cacao exportado",
+    "Ingresos", "Países de destino", "Clientes", "Pedidos", "Envíos activos",
+    "Tiempo promedio de entrega", "Estado de los contratos", "Pagos pendientes",
+]
+
+CADENA_ESTADOS = [
+    "Pedido recibido", "En preparación", "En producción", "En puerto",
+    "En tránsito", "En destino", "Entregado",
+]
+
+# =========================================================================== #
+# Reparto de la exposición                                                     #
+# =========================================================================== #
+#
+# Diez minutos, cuatro personas, dos bloques. Cada bloque lo explica una pareja
+# y va de lo general a lo particular, para que quien entra despues solo tenga
+# que continuar lo que dijo el anterior.
+#
+#   Bloque 1 - EL CIMIENTO: de donde vienen los datos y que reglas los vigilan
+#       Andres Villavicencio  -> estructura, arquitectura y pruebas
+#       Juanprogramming  -> relaciones, trazabilidad y cumplimiento
+#
+#   Bloque 2 - LA OPERACION: que hace el sistema con esos datos
+#       Juan Araujo          -> comercial, pedidos y portal del cliente
+#       Dario Paz            -> logistica, calidad, demostracion y cierre
+#
+# Cada diapositiva: (clave, dueno, titulo, segundos, [lineas del guion]).
+# El dueno es el indice dentro de EQUIPO. La clave la resuelve presentacion.py
+# contra la tabla de funciones.
+
+#: Nombre sin ambigüedad para citar a alguien: nombre de pila y apellido
+#: familiar. Necesario porque dos integrantes comparten nombre de pila.
+NOMBRE_CORTO = [n.split()[0] + " " + n.split()[-1] for n in EQUIPO]
+
+#: Nombre completo para las cabeceras de las diapositivas y el guion.
+NOMBRE = list(EQUIPO)
+
+EXPOSICION = [
+    {
+        "titulo": "El cimiento",
+        "lema": "De dónde vienen los datos y qué reglas los vigilan",
+        "integrantes": [0, 1],
+        "color": "4B7B52",
+        "diapositivas": [
+
+            ("portada", 0, "Portada y equipo", 20, [
+                "Buenos días. Somos el equipo de RiTech SAS y hoy presentamos el "
+                "sistema de gestión de exportaciones de café y cacao hacia la Unión "
+                "Europea.",
+                "Es el Sprint 2. Lo vamos a explicar en cuatro partes de dos minutos "
+                "y medio: los dos primeros explican el cimiento del sistema, y los "
+                "otros dos lo que hace con esos datos.",
+            ]),
+
+            ("problema", 0, "El problema y la propuesta", 45, [
+                "La pregunta que nos dimos al empezar: de qué finca viene un lote, "
+                "si cumple el reglamento europeo de deforestación y en qué contenedor "
+                "va. Eso vivía en planillas de cálculo y en cuadernos.",
+                "Nuestra respuesta es un solo sistema: registra el origen, la "
+                "calidad, las certificaciones y el envío, con acceso para el "
+                "personal de RiTech y un portal para el cliente europeo.",
+            ]),
+
+            ("arquitectura", 0, "Arquitectura y tecnologías", 45, [
+                "El sistema tiene cuatro capas: interfaz, API, lógica de negocio y "
+                "datos.",
+                "La API expone 58 operaciones, todas validadas y con control de "
+                "acceso por rol.",
+                "Y lo importante: las reglas de negocio están en una capa aparte, no "
+                "dentro de las rutas de la API. Por eso se pueden probar solas, sin "
+                "arrancar el servidor.",
+            ]),
+
+
+            ("diagrama_er", 1, "Diagrama entidad-relación", 50, [
+                "Este es el modelo de datos: las nueve tablas del proyecto más cinco "
+                "que añadieron los módulos.",
+                "La relación que importa es esta: una finca tiene lotes, un lote "
+                "tiene calidad y certificaciones, y aparece en muchas "
+                "exportaciones. Ese camino es la trazabilidad.",
+                "Definí las relaciones entre las tablas y comprobé que cada llave "
+                "foránea tuviera sentido con el proceso real de la empresa.",
+            ]),
+
+            ("diagrama_uml", 1, "Diagrama UML: actores y casos de uso", 50, [
+                "El sistema tiene seis actores. Cinco son del equipo: "
+                "administrador, comercial, logística, calidad y financiero. El "
+                "sexto es externo: el cliente europeo, que entra a su propio portal.",
+                "Treinta y siete casos de uso agrupados en seis módulos. Cada actor "
+                "tiene los suyos y nada más.",
+                "Implementé la trazabilidad del lote en las seis etapas y las "
+                "certificaciones del reglamento europeo, con su control de "
+                "vencimiento.",
+            ]),
+
+            ("pareja", None, "Lo que hicimos: el cimiento", 90, [
+                (0, "Yo me encargué de la estructura: definí las nueve tablas del "
+                    "modelo con sus llaves primarias y foráneas, y el esquema SQL."),
+                (0, "También el panel general y el módulo de reportes, que son las "
+                    "cifras que ve el gerente."),
+                (0, "Y las 51 pruebas automáticas que verifican el inventario, la "
+                    "cadena de estados y los permisos por rol."),
+                (1, "A mí me tocó la parte de datos y de cumplimiento. La "
+                    "trazabilidad: el lote recorre seis etapas, desde la finca hasta "
+                    "la entrega al cliente."),
+                (1, "Y las certificaciones: orgánica, Fairtrade y la europea de "
+                    "deforestación. Esta última solo cuenta si el lote tiene "
+                    "coordenadas de dónde está."),
+                (1, "También el cálculo del inventario disponible y los códigos "
+                    "correlativos de lote, contrato y cotización."),
+            ]),
+
+        ],
+    },
+
+    {
+        "titulo": "La operación",
+        "lema": "Qué hace el sistema con esos datos",
+        "integrantes": [2, 3],
+        "color": "A84B32",
+        "diapositivas": [
+
+            ("modulos", 2, "Los cuatro módulos del Sprint 2", 45, [
+                "Pasamos a lo que hace el sistema con esos datos. Son los cuatro "
+                "módulos del sprint.",
+                "Productores y lotes: alta de fincas y lotes, control de inventario y "
+                "trazabilidad.",
+                "Calidad y cumplimiento: catación, laboratorio y certificaciones. El "
+                "estado del lote se deriva solo del resultado.",
+                "Comercial: clientes europeos, cotizaciones en distintas monedas y "
+                "pedidos. Logística: contenedores, rutas y puertos.",
+            ]),
+
+            ("items", 2, "Elementos implementados en septiembre", 45, [
+                "Esto es el tablero del sprint: trece elementos, once épicas y dos "
+                "historias que quedaron para el sprint tres.",
+                "Cada uno tiene su responsable, que aparece en la columna de al lado.",
+                "Once de trece están terminados. El que está en curso son las "
+                "notificaciones, y las dos historias del sprint tres son el módulo "
+                "financiero y las integraciones.",
+            ]),
+
+
+            ("estado", 3, "Estado actual de la aplicación", 35, [
+                "Esto ya está funcionando, no es una maqueta. Esta pantalla es el "
+                "panel general.",
+                "Arriba están los cuatro indicadores: lotes activos, contenedores en "
+                "tránsito, certificaciones vigentes y contratos abiertos.",
+                "Abajo, la línea de tiempo del envío, en las seis etapas. La naranja "
+                "es por dónde va ahora, y las grises son las que faltan.",
+            ]),
+
+            ("calidad", 3, "Verificación y calidad", 35, [
+                "El software se entrega con 51 pruebas automáticas, no solo con una "
+                "demostración.",
+                "Y esas pruebas verifican reglas concretas: que no se pueda "
+                "comprometer más kilos de los disponibles en un lote, que la cadena de "
+                "estados solo avance un paso, y que anular una exportación devuelva "
+                "los kilos al inventario.",
+            ]),
+
+            ("demo", 3, "Demostración del prototipo", 35, [
+                "Ahora sí, lo muestro en vivo. Se levanta con un solo comando y hay "
+                "cuentas de prueba para cada rol.",
+                "El recorrido es este: panel, alta de una finca, registrar una "
+                "catación de 86 puntos y ver cómo el lote pasa solo a aprobado, "
+                "aceptar una cotización y ver el contrato generado, y abrir la línea "
+                "de tiempo de un envío.",
+            ]),
+
+
+            ("siguiente", 3, "Lo que sigue y cierre", 15, [
+                "Para el sprint tres queda el módulo financiero, las integraciones, "
+                "las copias de seguridad y la auditoría completa.",
+                "Con esto terminamos. Gracias por su atención, y quedamos a "
+                "disposición para sus preguntas.",
+            ]),
+            ("pareja", None, "Lo que hicimos: la operación", 90, [
+                (2, "Revisé los requisitos del informe y los convertí en historias de "
+                    "usuario con sus criterios de aceptación: de ahí salen las "
+                    "veintidós historias del documento."),
+                (2, "Construí el registro de clientes europeos, las cotizaciones en "
+                    "distintas monedas y la conversión de una cotización en "
+                    "contrato, que es lo que descuenta el inventario de los lotes."),
+                (2, "Y el portal del cliente: catálogo, seguimiento de envíos y "
+                    "descarga de documentos, pero solo de los que RiTech autoriza."),
+                (3, "Mi parte fue la logística y el seguimiento: contenedores, "
+                    "navieras, rutas y puertos. El estado del envío sincroniza el de "
+                    "la exportación."),
+                (3, "También el módulo de calidad, con la validación de humedad y la "
+                    "derivación automática del estado del lote."),
+                (3, "Y organicé las tareas del sprint con el equipo."),
+            ]),
+
+        ],
+    },
+]
+
+
+def guion_normalizado(guion) -> list:
+    """Normaliza un guion a una lista de (integrante, frase).
+
+    Las diapositivas de una persona sola guardan frases sueltas y devuelven
+    `None` como autor; las de pareja guardan parejas `(índice, frase)`.
+    """
+    salida = []
+    for entrada in guion:
+        if isinstance(entrada, tuple):
+            salida.append((entrada[0], entrada[1]))
+        else:
+            salida.append((None, entrada))
+    return salida
+
+
+def autores_de(guion) -> list:
+    """Índices de los integrantes que hablan en un guion, sin repetir."""
+    vistos = []
+    for indice, _frase in guion_normalizado(guion):
+        if indice is not None and indice not in vistos:
+            vistos.append(indice)
+    return vistos
+
+
+def minutos_por_integrante() -> dict:
+    """Segundos de cada persona.
+
+    Las diapositivas individuales se cuentan enteras a su dueño. Las de pareja se
+    reparten a partes iguales entre los que tienen línea, porque las dos personas
+    de la pareja comparten esa diapositiva.
+    """
+    total = {i: 0 for i in range(len(EQUIPO))}
+    for bloque in EXPOSICION:
+        for _clave, dueno, _titulo, segundos, guion in bloque["diapositivas"]:
+            if dueno is not None:
+                total[dueno] += segundos
+            else:
+                autores = autores_de(guion)
+                if autores:
+                    parte = segundos // len(autores)
+                    for i in autores:
+                        total[i] += parte
+    return total
+
+
+def _segundos_de(bloque) -> int:
+    return sum(x[3] for x in bloque["diapositivas"])
+
+
+def bloques_con_tiempos() -> list:
+    """Los bloques del reparto, cada uno con su inicio y su fin en el reloj."""
+    salida = []
+    inicio = 0
+    for bloque in EXPOSICION:
+        segundos = _segundos_de(bloque)
+        salida.append((bloque, inicio, inicio + segundos))
+        inicio += segundos
+    return salida
+
+
+# =========================================================================== #
+# Preguntas que seguro llegan en el turno de preguntas                        #
+# =========================================================================== #
+#
+# Respuestas de una o dos frases. Cualquiera de los cuatro las puede contestar,
+# pero conviene saber quién la tiene: si es técnica, derivarla a la persona que
+# hizo esa parte.
+
+PREGUNTAS_FRECUENTES = [
+    (
+        "¿Por qué PostgreSQL si el documento del proyecto menciona MySQL?",
+        "El requisito RR-003 pide PostgreSQL y el documento de base de datos "
+        "habla de MySQL. Para no elegir entre los dos, el modelo se escribió con "
+        "tipos portables y se entregan los dos guiones de creación. Los dominios "
+        "son VARCHAR con CHECK, nunca ENUM nativo, así que el esquema es el mismo "
+        "en ambos motores.",
+    ),
+    (
+        "¿Qué pasa si un lote se exporta dos veces?",
+        "No se puede comprometer más kilos de los disponibles. El disponible se "
+        "calcula como la cantidad menos lo comprometido en exportaciones que no "
+        "estén anuladas, y hay una prueba automática que lo verifica.",
+    ),
+    (
+        "¿Qué garantiza que la trazabilidad no se rompa?",
+        "Que el lote es la unidad de trazabilidad y de él cuelgan la calidad, las "
+        "certificaciones y las exportaciones. Anular una exportación devuelve los "
+        "kilos al inventario, pero no borra el historial.",
+    ),
+    (
+        "¿La certificación europea se puede registrar sin más?",
+        "No. Para el reglamento europeo de deforestación la certificación solo "
+        "cuenta si el lote está georreferenciado, con la latitud y la longitud de "
+        "la finca. Si falta, el sistema la marca como no válida.",
+    ),
+    (
+        "¿Cuánto falta para entregar el sistema completo?",
+        "El módulo financiero, las integraciones externas, las copias de seguridad "
+        "y la auditoría completa. Están identificados y programados para el "
+        "sprint tres.",
+    ),
+    (
+        "¿Se puede ver funcionando?",
+        "Sí, es la demostración que se hace al final. Se levanta con un comando y "
+        "hay cuentas de prueba para cada rol.",
+    ),
+]
+
+
+# =========================================================================== #
+# Guion detallado: qué dice cada persona, cómo y con qué puente               #
+# =========================================================================== #
+#
+# El texto hablado ronda las 1.600 palabras, que son los diez minutos a ritmo
+# de habla normal, unas 160 palabras por minuto. Lo que se amplía aquí es el
+# andamiaje: qué hay proyectado, en qué conviene señalar, con qué frase se pasa
+# a la siguiente y qué se recorta si se va con retraso.
+#
+# Las claves de diapositiva son las mismas de EXPOSICION, así que el guion no
+# puede desincronizarse de la presentación.
+
+#: La idea que cada persona tiene que dejar instalada, en una frase.
+IDEA = {
+    0: "Esto no es una interfaz: es un modelo de datos con reglas que no dejan "
+       "pasar un error, y todo lo demás se apoya en eso.",
+    1: "Del lote sale la trazabilidad, y de la trazabilidad sale el "
+       "cumplimiento del reglamento europeo: sin coordenadas no hay "
+       "certificación.",
+    2: "El cimiento ya está. Ahora vemos qué hace el sistema con esos datos "
+       "para que un cliente europeo pueda comprar café desde Colombia.",
+    3: "Todo eso funciona de verdad: está cargado con datos reales y sus "
+       "reglas están verificadas por pruebas automáticas.",
+}
+
+#: (clave, qué se ve en pantalla, qué dice, cómo lo dice, frase de puente)
+GUION_DETALLADO = {
+    # ---------------------------------------------------------------- Andres
+    0: [
+        ("portada",
+         "Fondo oscuro con el título del proyecto y los cuatro nombres. No hay "
+         "ninguna información: la diapositiva existe para dar tiempo a que la "
+         "sala se acomode y para marcar que la presentación va a ser de "
+         "arquitectura a operación.",
+         [
+             "Buenos días. Somos el equipo de RiTech SAS y les vamos a "
+             "presentar el sistema de gestión de exportaciones de café y cacao "
+             "hacia la Unión Europea.",
+             "Corresponde al Sprint 2. Lo vamos a explicar en cuatro partes de "
+             "dos minutos y medio. Los dos primeros explicamos de dónde vienen "
+             "los datos y qué reglas los vigilan; los otros dos explican qué "
+             "hace el sistema con esos datos.",
+             "Empiezo yo.",
+         ],
+         "No leas el título de la pantalla, ya lo tienen delante. Mira de frente, "
+         "no a la pantalla. Los tres primeros segundos deciden si la sala te "
+         "toma en serio: dilos sin correr y con una pausa antes de «Empiezo yo».",
+         "Empiezo por el problema que nos hizo construir esto."),
+
+        ("problema",
+         "Dos columnas: «Antes» a la izquierda y «Ahora» a la derecha. Debajo, "
+         "cuatro tarjetas: origen, calidad, cumplimiento y trazabilidad.",
+         [
+             "La pregunta que nos dimos al empezar fue muy concreta: de qué "
+             "finca viene un lote, si cumple el reglamento europeo de "
+             "deforestación, y en qué contenedor va.",
+             "La respuesta estaba repartida entre planillas de cálculo y "
+             "cuadernos. Eso quiere decir que nadie podía responder las tres "
+             "cosas a la vez, y las tres juntas son justo lo que le importa a un "
+             "importador europeo.",
+             "Nuestra respuesta es un solo sistema. Registra el origen del "
+             "producto, su calidad, sus certificaciones y su envío. Y tiene dos "
+             "puertas de entrada: una para el personal de RiTech y un portal para "
+             "el cliente europeo.",
+             "Lo que ven abajo, en las cuatro tarjetas, es lo que el sistema "
+             "tiene que saber de cualquier exportación.",
+         ],
+         "Esta es la diapositiva más importante de la presentación: si la sala "
+         "solo entiende una, que sea esta. Señala la columna «Antes» y luego la "
+         "de «Ahora», sin leer las tarjetas: el detalle de cada una viene "
+         "después, en los dos diagramas.",
+         "Y para que se vea con qué está construido, esta es la arquitectura."),
+
+        ("arquitectura",
+         "Cuatro capas apiladas a la izquierda, cada una con su color: "
+         "interfaz, API, lógica de negocio y datos. A la derecha, las "
+         "tecnologías en etiquetas.",
+         [
+             "Son cuatro capas. La interfaz es una aplicación web hecha con "
+             "módulos de JavaScript, sin paso de compilación, para que no "
+             "dependa de herramientas de terceros.",
+             "La API expone cincuenta y ocho operaciones, todas validadas y con "
+             "control de acceso por rol: cada persona ve solo lo que le "
+             "corresponde.",
+             "Pero lo importante es la tercera capa. Las reglas de negocio no "
+             "están escritas dentro de las rutas de la API, están aparte. Por "
+             "eso se pueden probar solas, sin arrancar el servidor, y por eso "
+             "hay cincuenta y una pruebas automáticas.",
+             "Abajo está la capa de datos: las nueve tablas del modelo del "
+             "proyecto más cinco que añadieron los módulos.",
+         ],
+         "Señala la tercera capa en el momento en que digas «lo importante». Esa "
+         "es la idea que quieres que quede: una decisión de diseño, no una lista "
+         "de herramientas. No leas las etiquetas de la derecha, son ruido.",
+         "Con esto tienen el cimiento. Le doy la palabra a Juanprogramming para "
+         "los datos."),
+
+        ("pareja",
+         "Dos tarjetas a la izquierda, una con tu nombre y otra con el de "
+         "Juanprogramming. A la derecha, el guion con cada frase atribuida a su "
+         "autor. Los turnos están marcados: primero tú, después él.",
+         [
+             "Yo me encargué de la estructura: definí las nueve tablas del "
+             "modelo con sus llaves primarias y foráneas, y el esquema SQL.",
+             "También el panel general y el módulo de reportes, que son las "
+             "cifras que ve el gerente cuando pregunta cómo va el mes.",
+             "Y las cincuenta y una pruebas automáticas que verifican el "
+             "inventario, la cadena de estados y los permisos por rol. Con eso "
+             "queda mi parte.",
+         ],
+         "Esta diapositiva la comparten los dos. Di tus tres frases seguidas, "
+         "sin mirar las de Juanprogramming, y después pásale el turno con un "
+         "gesto o con «Juanprogramming, tu parte». No te quedes callado más de "
+         "un segundo después de tu última frase: el silencio se lee como "
+         "duda.",
+         "Con esto cerramos el bloque del cimiento. Le doy la palabra a "
+         "Juanprogramming para que muestre los dos diagramas."),
+    ],
+
+    # --------------------------------------------------------- Juanprogramming
+    1: [
+        ("diagrama_er",
+         "El diagrama entidad-relación a pantalla completa: nueve cajas de "
+         "tablas en tres filas, flechas ortogonales y la etiqueta «1 : N» en "
+         "cada relación.",
+         [
+             "Este es el modelo de datos: las nueve tablas del proyecto más "
+             "cinco que añadieron los módulos.",
+             "Fíjense en la relación que recorre el dibujo. Una finca tiene "
+             "lotes, un lote tiene calidad y certificaciones, y el mismo lote "
+             "aparece en muchas exportaciones.",
+             "Ese camino, de la finca hasta la exportación, es la "
+             "trazabilidad. Y no sale de un módulo aparte que la controle: sale "
+             "solo de cómo están conectadas las tablas.",
+             "Yo definí estas relaciones y comprobé que cada llave foránea "
+             "tuviera sentido con el proceso real de la empresa.",
+         ],
+         "No intentes leer los nombres de todos los campos: se ve que están y "
+         "con eso basta. Señala las flechas mientras hablas, que es lo que "
+         "hace que se entienda por qué el diagrama importa. Si alguien pregunta "
+         "por una tabla concreta, la abres al final de la presentación y "
+         "respondes.",
+         "El mismo sistema, visto desde quién hace qué. Aquí está el diagrama "
+         "de casos de uso."),
+
+        ("diagrama_uml",
+         "El diagrama UML: seis columnas, una por módulo, con los casos de uso "
+         "en óvalos y el actor debajo de cada columna.",
+         [
+             "El sistema tiene seis actores. Cinco son del equipo: "
+             "administrador, comercial, logística, calidad y financiero. El "
+             "sexto es externo: el cliente europeo, que entra a su propio "
+             "portal y solo ve sus operaciones.",
+             "Treinta y siete casos de uso, agrupados en seis módulos. Cada "
+             "actor tiene los suyos y nada más: el comercial no toca la "
+             "logística, y el cliente europeo no toca nada del interior.",
+             "Todo eso se nota en la implementación. Yo hice la trazabilidad del "
+             "lote en las seis etapas, y las certificaciones del reglamento "
+             "europeo con su control de vencimiento.",
+             "Esa última parte tiene una condición que quiero explicar ahora "
+             "mismo, porque es el requisito más importante del proyecto.",
+         ],
+         "Este diagrama se lee más fácil que el anterior: empieza por los "
+         "actores, que es lo primero que la sala entiende. Reserva la frase "
+         "final para dejar la intriga: ese es el remate hacia tu parte.",
+         "Entonces, qué hicimos los dos en el cimiento:"),
+
+        ("pareja",
+         "Las mismas dos tarjetas de antes, con las frases atribuidas a cada "
+         "uno. Ahora empieza Juanprogramming y después entra Andres.",
+         [
+             "A mí me tocó la parte de datos y de cumplimiento. La "
+             "trazabilidad: el lote recorre seis etapas, desde la finca hasta "
+             "la entrega al cliente.",
+             "Y las certificaciones: orgánica, Fairtrade y la europea de "
+             "deforestación. Esta última es la importante, y tiene una "
+             "condición: solo cuenta si el lote tiene las coordenadas de dónde "
+             "está.",
+             "Es decir, no basta con decir que el café es legal. Hay que poder "
+             "demostrar en qué punto del mapa se cortó el árbol, y el sistema no "
+             "deja registrar esa certificación sin las coordenadas.",
+             "También el cálculo del inventario disponible y los códigos "
+             "correlativos de lote, contrato y cotización.",
+         ],
+         "Entra cuando Andres te pase el turno, no antes. La frase de las "
+         "coordenadas es la más importante de tu parte: dila más despacio que el "
+         "resto y haz una pausa después de «no basta con decir que el café es "
+         "legal». Si de todo el bloque se recuerda una sola frase, que sea esa.",
+         "Con esto queda el bloque del cimiento. Le doy la palabra a Juan "
+         "Araujo para que veamos lo que hace el sistema."),
+    ],
+
+    # ----------------------------------------------------------- Juan Araujo
+    2: [
+        ("modulos",
+         "Cuatro tarjetas grandes en dos columnas: productores y lotes, "
+         "calidad y cumplimiento, comercial, logística.",
+         [
+             "Pasamos a lo que hace el sistema. Son los cuatro módulos del "
+             "sprint, los que SulawesiEn la planificación inicial.",
+             "Productores y lotes: alta de fincas y de lotes, control del "
+             "inventario disponible y trazabilidad de cada lote.",
+             "Calidad y cumplimiento: catación, laboratorio y certificaciones. "
+             "Aquí hay un detalle que nos gustó mucho: el estado del lote no lo "
+             "escribe la persona, se deriva del resultado. Si la catación da "
+             "ochenta y seis puntos, el lote pasa solo a aprobado.",
+             "Comercial: clientes europeos, cotizaciones en distintas monedas y "
+             "pedidos. Y logística: contenedores, rutas y puertos.",
+         ],
+         "Vas con dos diapositivas propias y una compartida, así que esta es tu "
+         "primera oportunidad de mostrar criterio propio. El detalle del estado "
+         "derivado demuestra que el sistema impone reglas en vez de confiar en "
+         "quien lo carga. No leas las cuatro tarjetas enteras.",
+         "Y esto es lo que dejamos cerrado en la planificación:"),
+
+        ("items",
+         "Una tabla con las trece claves del tablero, de RIT-101 a RIT-113, con "
+         "la épica, las historias, el responsable y el avance.",
+         [
+             "Esto es el tablero del sprint. Trece elementos: once épicas y dos "
+             "historias que quedaron para el sprint tres.",
+             "Cada elemento tiene su responsable, y está en la columna de al "
+             "lado. Ese reparto sale del aporte que hizo cada uno, y hay que "
+             "contrastarlo con Jira antes de entregar.",
+             "Once de trece están terminados. El que está en curso son las "
+             "notificaciones, y las dos historias del sprint tres son el módulo "
+             "financiero y las integraciones.",
+         ],
+         "La tabla es pequeña, así que no la leas. Señala la última fila y da "
+         "el dato: once de trece. Si alguien pregunta por un elemento concreto, "
+         "lo nombras y sigues. No te entretengas con la tabla, que te quedan dos "
+         "minutos y medio y aún falta la demostración.",
+         "Para cerrar mi parte, qué hicimos Juan Araujo y Dario:"),
+
+        ("pareja",
+         "Tres frases tuyas y después las de Dario. Los turnos están marcados "
+         "en la pantalla.",
+         [
+             "Yo trabajé el frente comercial y el portal del cliente.",
+             "Primero revisé los requisitos del informe y los convertí en "
+             "historias de usuario con sus criterios de aceptación. Ahí están "
+             "las veintidós historias que van en el documento, y de ahí sale "
+             "todo lo demás que se puede hacer.",
+             "Luego construí el registro de clientes europeos, las cotizaciones "
+             "en distintas monedas y la conversión de una cotización en "
+             "contrato, que es lo que descuenta el inventario de los lotes.",
+             "Y el portal del cliente: catálogo, seguimiento de envíos y "
+             "descarga de documentos, pero solo de los que RiTech autoriza.",
+         ],
+         "Esta es tu diapositiva de allotted, así que no la pases rápido. La "
+         "frase que mejor te sitúa es la de los criterios de aceptación: "
+         "muestra que revisaste requisitos, no solo que programaste. Cuando "
+         "termines tus cuatro frases, pasa el turno con «Dario, ahora tú».",
+         "Dario les va a enseñar cómo funciona."),
+    ],
+
+    # ------------------------------------------------------------------ Dario
+    3: [
+        ("estado",
+         "Una captura real del panel general: los cuatro indicadores arriba, la "
+         "línea de tiempo del envío en el centro y las barras de cumplimiento "
+         "normativo más abajo.",
+         [
+             "Esto ya está funcionando. No es una maqueta: es el sistema con los "
+             "datos de demostración cargados.",
+             "Esta es la pantalla de entrada. Arriba, los cuatro indicadores: "
+             "lotes activos, contenedores en tránsito, certificaciones "
+             "vigentes y contratos abiertos. Son las cuatro preguntas que hace "
+             "un gerente por la mañana.",
+             "Abajo, la línea de tiempo del envío, con las seis etapas, de la "
+             "finca hasta la entrega. La naranja es por dónde va ahora el "
+             "contenedor que está abierto, y las grises son las que faltan.",
+             "Esta línea no se escribe a mano: se arma con los hitos que "
+             "registra el sistema, y por eso el cliente ve exactamente lo mismo "
+             "que RiTech.",
+         ],
+         "Es la primera vez que la sala ve el producto, así que dilo con "
+         "seguridad: no te disculpes ni lo llames versión básica. Señala la línea "
+         "de tiempo con el cursor si puedes; la etapa naranja es el detalle que "
+         "la gente capta rápido. Vas a ser quien más tiempo tiene delante, así "
+         "que habla mirando al público y no a la pantalla.",
+         "Pero que funcione no es lo mismo que esté bien construido. De eso se "
+         "encarga la siguiente:"),
+
+        ("calidad",
+         "Tres tarjetas arriba: las 51 pruebas, los 58 endpoints y los datos de "
+         "ejemplo. Debajo, seis reglas de negocio en dos columnas.",
+         [
+             "El software se entrega con cincuenta y una pruebas automáticas, "
+             "no solo con una demostración que funciona.",
+             "Y esas pruebas no comprueban que las cosas carguen: comprueban "
+             "reglas. Les pongo tres ejemplos de las seis de abajo.",
+             "Que no se pueda comprometer más kilos de los disponibles en un "
+             "lote. Que la cadena de estados solo pueda avanzar un paso, para "
+             "que nadie se salte la producción. Y que anular una exportación "
+             "devuelva los kilos al inventario.",
+             "La última es la que más se nota en el negocio: si algo sale mal, "
+             "los kilos vuelven a estar disponibles y no se pierden.",
+         ],
+         "Aquí no digas «tiene muchas pruebas» como si eso fuera un logro. El "
+         "argumento es qué evitan las pruebas. Escoge las tres reglas que "
+         "menciones y no las leas todas: es mejor tres bien explicadas que "
+         "seis atropelladas.",
+         "Y para que lo vean por sí mismos:"),
+
+        ("demo",
+         "Una caja oscura con los comandos para levantar el sistema y, a la "
+         "derecha, los seis pasos del recorrido en una lista numerada.",
+         [
+             "Ahora sí, lo muestro en vivo. Se levanta con un comando y hay "
+             "cuentas de prueba para cada rol, así que no hay que instalar nada.",
+             "El recorrido que voy a hacer es este: abro el panel, creo una "
+             "finca nueva, registro una catación de ochenta y seis puntos y les "
+             "enseño cómo el lote pasa solo a aprobado sin que nadie lo escriba.",
+             "Después acepto una cotización y vemos cómo se genera el contrato "
+             "y cómo se descuenta el inventario. Y por último abro la línea de "
+             "tiempo de un envío, que es lo mismo que ve el cliente.",
+         ],
+         "Es la parte que más se recuerda, así que no la conviertas en un "
+         "recorrido larguísimo: cuatro pasos bastan. Si algo falla, no te "
+         "disculpes ni lo arregles en público; di «aquí vemos que el sistema "
+         "responde lo que le pedimos» y sigue. Lo importante ya lo has "
+         "demostrado con las pruebas de la diapositiva anterior.",
+         "Y para cerrar:"),
+
+        ("siguiente",
+         "A la izquierda, los pendientes del sprint tres. A la derecha, el "
+         "bloque de conclusiones con tres párrafos.",
+         [
+             "Para el sprint tres queda el módulo financiero, las integraciones "
+             "externas, las copias de seguridad y la auditoría completa. Está "
+             "identificado y planificado, no es un descuido.",
+             "Con esto terminamos. Gracias por su atención, y quedamos a "
+             "disposición para sus preguntas.",
+         ],
+         "Quince segundos, ni uno más. Di el «gracias» mirando a la sala y "
+         "quédate de pie. El turno de preguntas lo lleva quien tenga más "
+         "confianza con la parte técnica, normalmente yo. Si notas que te has "
+         "quedado corto de tiempo, mejor callar aquí y ampliar en las preguntas.",
+         "Antes de las preguntas, digamos qué hicimos Dario y yo:"),
+
+        ("pareja",
+         "Tres frases tuyas y tres de Juan Araujo. Empiezas tú, porque es la "
+         "última diapositiva del recorrido.",
+         [
+             "Mi parte fue la logística y el seguimiento: contenedores, "
+             "navieras, rutas y puertos. El estado del envío sincroniza el de "
+             "la exportación, para que la línea de tiempo que vimos no se "
+             "desincronice nunca.",
+             "También el módulo de calidad, con la validación de humedad y la "
+             "derivación automática del estado del lote, que es lo que "
+             "explicó Juan Araujo al hablar de los módulos.",
+             "Y organicé las tareas del sprint con el equipo.",
+         ],
+         "Es la última diapositiva, así que ciérrala bien: recapitula en una "
+         "línea y devuelve la palabra. Si el guion se pasa un poco en la "
+         "diapositiva de cierre, esta es la que absorbe el retraso.",
+         "Con esto cerramos. Gracias por su atención."),
+    ],
+}
+
+#: Qué recortar si se va con retraso, por orden.
+PLAN_B = [
+    "En la diapositiva de arquitectura, la frase sobre la interfaz: la capa "
+    "que importa es la tercera, y esa se dice igual.",
+    "En «Los cuatro módulos», no leas la tarjeta de logística: ya se explica "
+    "en la demostración.",
+    "En «Elementos implementados», la frase sobre el contraste con Jira: el "
+    "dato de once de trece ya está en la tabla.",
+    "En «Verificación y calidad», di solo dos reglas de las seis.",
+    "La tercera frase de tu parte en la diapositiva compartida es la "
+    "prescindible si vas con más de treinta segundos de retraso.",
+]
+
+#: Lo que conviene no hacer, cualquier persona.
+PRECAUCIONES = [
+    "No leer las tablas ni los diagramas palabra por palabra: la sala no "
+    "puede leer más rápido de lo que hablas, y se queda con el sonido, no con "
+    "el texto.",
+    "No disculparte por el prototipo ni llamarlo versión básica. Está "
+    "funcionando y con reglas verificadas por pruebas.",
+    "No abrir debates técnicos si la pregunta es de negocio, ni al revés. Si "
+    "no sabes la respuesta, di «no lo tenemos medido» y sigue: nadie espera "
+    "que sepáis todo.",
+    "No dejar que un compañero se pase de tiempo. Si Andres va largo, es "
+    "responsabilidad de todos cortarle con un «Juanprogramming, te toca».",
+    "No terminar con «no hay más que decir». Cerrad con la idea del bloque y "
+    "con el agradecimiento, como está escrito.",
+]
+
+
+#: Palabras por minuto de habla normal en una presentación de este tipo.
+PALABRAS_POR_MINUTO = 160
+
+
+def _cabe(frases, limite_palabras):
+    """Cuántas frases caben en el límite, sin partir ninguna.
+
+    Siempre entra al menos la primera: una diapositiva sin frases es peor que
+    una diapositiva con una frase de más.
+    """
+    total, caben = 0, 0
+    for frase in frases:
+        palabras = len(frase.split())
+        if caben and total + palabras > limite_palabras:
+            break
+        total += palabras
+        caben += 1
+    return caben
+
+
+def guion_por_persona() -> dict:
+    """Guion de cada persona, con el corte de los diez minutos ya hecho.
+
+    Devuelve {índice: [ {clave, numero, titulo, segundos, pantalla, decir,
+    ampliacion, como, puente}, … ]} en el orden en que cada uno habla.
+    """
+    # Segundos por diapositiva, y quién se los reparten cuando es compartida.
+    reparto: dict = {}
+    numero = 1
+    for bloque in EXPOSICION:
+        for clave, dueno, titulo, segundos, guion in bloque["diapositivas"]:
+            autores = autores_de(guion)
+            if dueno is not None:
+                reparto[(dueno, clave)] = (numero, titulo, segundos, False)
+            else:
+                for a in autores:
+                    reparto[(a, clave)] = (numero, titulo,
+                                           segundos // len(autores), True)
+            numero += 1
+
+    detalle = {clave: entrada
+               for lista in GUION_DETALLADO.values()
+               for clave, entrada in
+               ((e[0], {"pantalla": e[1], "decir": e[2], "como": e[3],
+                        "puente": e[4]}) for e in lista)}
+
+    salida = {}
+    for i, nombre in enumerate(EQUIPO):
+        entradas = []
+        for clave, _p, _q, _r, guion in GUION_DETALLADO[i]:
+            if (i, clave) not in reparto:
+                continue
+            numero, titulo, segundos, compartida = reparto[(i, clave)]
+            info = detalle[clave]
+            limite = max(12, int(segundos * PALABRAS_POR_MINUTO / 60))
+            frases = info["decir"]
+            caben = _cabe(frases, limite)
+            entradas.append({
+                "clave": clave,
+                "numero": numero,
+                "titulo": titulo,
+                "segundos": segundos,
+                "compartida": compartida,
+                "pantalla": info["pantalla"],
+                "decir": frases[:caben],
+                "ampliacion": frases[caben:],
+                "como": info["como"],
+                "puente": info["puente"],
+            })
+        salida[i] = entradas
+    return salida
+
+
+def palabras_de_guion() -> dict:
+    """Palabras que se dicen de verdad en los diez minutos, por persona."""
+    conteo = {}
+    for i, entradas in guion_por_persona().items():
+        conteo[i] = sum(len(f.split()) for e in entradas for f in e["decir"])
+    return conteo
